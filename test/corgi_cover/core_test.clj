@@ -13,8 +13,7 @@
 (deftest eligible-test
   (testing "Corgi cover eligibility"
     (doseq [td test-data]
-      (let [s (:state td)
-            c (:corgi-count td)]
+      (let [{s :state c :corgi-count} td]
         (if (valid-test-states s)
           (is (eligible? s c))
           (is (not (eligible? s c))))))))
