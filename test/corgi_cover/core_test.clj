@@ -18,3 +18,11 @@
         (if (valid-test-states s)
           (is (eligible? s c))
           (is (not (eligible? s c))))))))
+
+(deftest tier-coverage-test
+  (testing "Returns the correct tier"
+    (is (= :platinum (tier-coverage "IL" 7 0)))
+    (is (= :platinum (tier-coverage "WA" 3 1)))
+    (is (= :gold     (tier-coverage "NY" 3 0)))
+    (is (= :silver   (tier-coverage "CO" 1 0)))
+    (is (= :none     (tier-coverage "WY" 19 0)))))
