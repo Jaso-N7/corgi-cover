@@ -28,7 +28,7 @@
   Throws an Exception for invalid inputs.
   (eligible? \"IL\" 1) => true"
   [a-state corgi-count]
-  (when-not (and (string? a-state) (int? corgi-count))
+  (when-not (and (string? a-state) (nat-int? corgi-count))
     (throw (ex-info "Invalid inputs" {:a-state a-state
                                       :corgi-count corgi-count})))
   (and (contains? state a-state) (pos? corgi-count)))
