@@ -2,29 +2,42 @@
 
 ;;; --- Data Definitions:
 (def state
-  "A State is a set: (hash-set S)
-  where S is a(n) (abbreviated) String representing where an individual
-  must live to be considered eligible."
+  "A State is a set:
+    (hash-set S)
+  representing an individuals address to be considered eligible,
+  where S is an abbreviated String"
   #{"IL" "WA" "NY" "CO"})
 
-;; A Tier is a keyword of either:
+;; A Tier is one of:
 ;; - :platinum
 ;; - :gold
 ;; - :silver
 ;; - :none
-;; where the keyword reflects
+;; INTERPRETATION: Tiers/Packages offered for "Corgi Cover" insurance
+;; WHERE: the keyword reflects
 ;; "corgi cover platinum",
 ;; "corgi cover gold",
 ;; "corgi cover silver" or
-;; "none" / "non-eligibility" . 
+;; "none" / "non-eligibility" .
+;; TEMPLATE:
+#_(defn fn-for-tier [t]
+    (cond (= t :platinum) '?
+          (= t :gold) '?
+          (= t :silver) '?
+          (= t :none) '?))
+;; rules used:
+;; - one of: 4 cases
+;; - atomic distinct value: keyword
 
 ;; An Application is a Map:
 ;;   (hash-map :name S :state S :corgi-count N :policy-count N)
-;; where S is a String and N is a Natural number
+;; INTERPRETATION: contains details regarding the policy holder
+;; WHERE: S is a String and N is a Natural number
 
 ;; A Policy is a Map:
 ;;   (hash-map NM [PS])
-;; where NM is the applicants name and PS are the names of their
+;; INTERPRETATION: Policies held by applicant
+;; WHERE: NM is the applicants name and PS are the names of their
 ;; current policies
 
 ;;; --- Function Definitions:
@@ -53,8 +66,8 @@
     (cond (or (>= corgi-count 7)
               (and (>= corgi-count 3)
                    (pos-int? policy-count))) :platinum
-          (>= corgi-count 3) :gold
-          :else :silver)
+          (>= corgi-count 3)                 :gold
+          :else                              :silver)
     :none))
 
 ;; register : Application -> Tier
