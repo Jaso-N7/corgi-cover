@@ -25,3 +25,10 @@
     (is (= :gold     (tier-coverage "NY" 3 0)))
     (is (= :silver   (tier-coverage "CO" 1 0)))
     (is (= :none     (tier-coverage "WY" 19 0)))))
+
+(deftest register-test
+  (testing "Returns the correct tier based on application"
+    (is (= :silver   (register (get test-data 0))))
+    (is (= :platinum (register (test-data 1))))
+    (is (= :none     (register (test-data 2))))
+    (is (= :silver   (register (test-data 3))))))
