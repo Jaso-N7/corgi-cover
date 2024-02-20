@@ -3,12 +3,18 @@
             [corgi-cover.core :refer :all]))
 
 (def valid-test-states
+  "States eligible for Corgi Coverage"
   #{"IL" "WA" "NY" "CO"})
 (def test-data
+  "Each element represents an an application for Insuricorp coverage."
   [{:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0}
    {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}
    {:name "Annabelle" :state "WY" :corgi-count 19 :policy-count 0}
    {:name "Logan" :state "WA" :corgi-count 2 :policy-count 1}])
+(def test-policies
+  "A map of people to their existing policies"
+  {"Chloe" ["secure goldfish"]
+   "Ethan" ["cool cats cover" "megasafe"]})
 
 (deftest eligible-test
   (testing "Corgi cover eligibility"
@@ -32,3 +38,10 @@
     (is (= :platinum (register (test-data 1))))
     (is (= :none     (register (test-data 2))))
     (is (= :silver   (register (test-data 3))))))
+
+(deftest registration-test
+  (testing "Returns the correct tier based on application"
+    (is (= :silver   (registration (get test-data 0) test-policies)))
+    (is (= :platinum (registration (test-data 1) test-policies)))
+    (is (= :none     (registration (test-data 2) test-policies)))
+    (is (= :silver   (registration (test-data 3) test-policies)))))
