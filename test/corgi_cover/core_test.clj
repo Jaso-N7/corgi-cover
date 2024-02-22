@@ -2,19 +2,16 @@
   (:require [clojure.test :refer :all]
             [corgi-cover.core :refer :all]))
 
-(def valid-test-states
-  "States eligible for Corgi Coverage"
-  #{"IL" "WA" "NY" "CO"})
-(def test-data
-  "Each element represents an an application for Insuricorp coverage."
-  [{:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0}
-   {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}
-   {:name "Annabelle" :state "WY" :corgi-count 19 :policy-count 0}
-   {:name "Logan" :state "WA" :corgi-count 2 :policy-count 1}])
-(def test-policies
-  "A map of people to their existing policies"
-  {"Chloe" ["secure goldfish"]
-   "Ethan" ["cool cats cover" "megasafe"]})
+(use-fixtures :once
+  (fn setup-test-data [tests]
+    (let [valid-test-states #{"IL" "WA" "NY" "CO"}
+          test-data [{:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0}
+                     {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}
+                     {:name "Annabelle" :state "WY" :corgi-count 19 :policy-count 0}
+                     {:name "Logan" :state "WA" :corgi-count 2 :policy-count 1}]
+          test-policies {"Chloe" ["secure goldfish"]
+                         "Ethan" ["cool cats cover" "megasafe"]}]
+      (tests))))
 
 (deftest eligible-test
   (testing "Corgi cover eligibility"
