@@ -38,7 +38,7 @@
 ;;   (hash-map NM [PS])
 ;; INTERPRETATION: Policies held by applicant
 ;; WHERE: NM is the applicants name and PS are the names of their
-;; current policies
+;; current policies. Both are represented as String.
 
 ;;; --- Function Definitions:
 
