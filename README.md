@@ -1,10 +1,17 @@
 # corgi-cover
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure library designed to validate applications for an insurance policy.
+
+Insuricorp is about to launch a marketing campaign of a new "corgi cover"
+insuracenc policy. Only certain people are eligible to register for "corgi
+cover". To be eligible they must own a corgi and live in either Illinois,
+Washington, New York or Colorado.
+
+This is Challenge 1 taken from the Enterprise Clojure course.
 
 ## Usage
 
-FIXME
+
 
 ## License
 
