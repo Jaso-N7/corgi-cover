@@ -45,3 +45,7 @@
       (is (= :platinum (registration (test-data 1) test-policies)))
       (is (= :none     (registration (test-data 2) test-policies)))
       (is (= :silver   (registration (test-data 3) test-policies))))))
+
+(deftest test-onboarding
+  (let [applications (slurp "./src/resources/corgi-cover-applications.csv")]
+      (is (= "name, state, corgi-count, policy-count\n\"Chloe\", \"IL\", 1, 0\n\"Ethan\", \"IL\", 4, 2\n\"Annabelle\", \"WY\", 19, 0\n\"Logan\", \"WA\", 2, 1" applications) "Can read corgi cover applications CSV file")))
