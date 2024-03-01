@@ -12,3 +12,6 @@ pom.xml.asc
 /.prepl-port
 .gitignore
 .git/**
+.nrepl-port
+.lein-failures
+*.orig
