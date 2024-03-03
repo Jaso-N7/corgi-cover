@@ -37,8 +37,10 @@
   (testing "Returns the correct tier based on application"
     (let [test-data [{:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0}
                      {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}
-                     {:name "Annabelle" :state "WY" :corgi-count 19 :policy-count 0}
-                     {:name "Logan" :state "WA" :corgi-count 2 :policy-count 1}]
+                     {:name "Annabelle" :state "WY"
+                      :corgi-count 19 :policy-count 0}
+                     {:name "Logan" :state "WA"
+                      :corgi-count 2 :policy-count 1}]
           test-policies {"Chloe" ["secure goldfish"]
                          "Ethan" ["cool cats cover" "megasafe"]}]
       (is (= :silver   (registration (get test-data 0) test-policies)))
@@ -47,5 +49,21 @@
       (is (= :silver   (registration (test-data 3) test-policies))))))
 
 (deftest test-onboarding
-  (let [applications (slurp "./src/resources/corgi-cover-applications.csv")]
-      (is (= "name, state, corgi-count, policy-count\n\"Chloe\", \"IL\", 1, 0\n\"Ethan\", \"IL\", 4, 2\n\"Annabelle\", \"WY\", 19, 0\n\"Logan\", \"WA\", 2, 1" applications) "Can read corgi cover applications CSV file")))
+  (let [test-data [{:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0}
+                   {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}
+                   {:name "Annabelle" :state "WY"
+                    :corgi-count 19 :policy-count 0}
+                   {:name "Logan" :state "WA"
+                    :corgi-count 2 :policy-count 1}]
+        file "./src/resources/corgi-cover-applications.csv"
+        bad-file "./does/not/exist"]
+    
+    (testing "Can read corgi cover applications CSV file"
+      (let [applications (slurp file)]
+        (is (= "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nAnnabelle, WY, 19, 0\nLogan, WA, 2, 1"
+               applications))))
+    
+    (testing "Can convert file to data structure"
+      (is (= test-data (load-applications file))))
+    (testing "Gracefully handles issues"
+      (is (nil? (load-applications bad-file))))))
