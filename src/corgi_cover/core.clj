@@ -1,4 +1,6 @@
-(ns corgi-cover.core "Corgi Cover Eligibility")
+(ns corgi-cover.core "Corgi Cover Eligibility"
+    (:require [clojure.string :as string])
+    (:import [java.io BufferedReader StringReader]))
 
 ;;; --- Data Definitions:
 (def state
@@ -86,3 +88,30 @@
         tier (register an-application)]
     (cond (and (not= :none tier) ms-holder?) :platinum
           (not ms-holder?) tier)))
+
+;; load-applications : IO File -> [Applications]
+#_(defn load-applications [file]
+  (println {:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0})
+  [{:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0}
+   {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}
+   {:name "Annabelle" :state "WY"
+    :corgi-count 19 :policy-count 0}
+   {:name "Logan" :state "WA"
+    :corgi-count 2 :policy-count 1}])   ; stub
+
+(defn load-applications
+  "Opens CSV containing Corgi Cover applications and converts the information
+  to an internal data structure.
+  Returns NIL if unable to perform operation."
+  [file]
+  (try
+    (when (.exists (clojure.java.io/file file))
+      (let [contents (line-seq (BufferedReader. (StringReader. (slurp file))))
+            header (first contents)
+            applications (rest contents)]
+        (into [] (for [application applications]
+                   (apply merge (map #(hash-map %1 %2)
+                                     (string/split header #", ")
+                                     (string/split application #", ")))))))
+    (catch java.io.FileNotFoundException x
+      (println "Unable to load/find file: " file))))
