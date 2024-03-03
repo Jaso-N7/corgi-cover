@@ -110,7 +110,7 @@
             header (first contents)
             applications (rest contents)]
         (into [] (for [application applications]
-                   (apply merge (map #(hash-map %1 %2)
+                   (apply merge (map #(hash-map (keyword %1) %2)
                                      (string/split header #", ")
                                      (string/split application #", ")))))))
     (catch java.io.FileNotFoundException x
