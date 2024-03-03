@@ -68,9 +68,14 @@
     (testing "Validate CSV loaded applications"
       (let [test-policies {"Chloe" ["secure goldfish"]
                            "Ethan" ["cool cats cover" "megasafe"]}]
-        (is (= [:silver :platinum]
-               (map registration (load-applications file) test-policies)))
+        (is (= '(true true false true)
+               (map #(eligible? (:state %) (:corgi-count %))
+                    (load-applications file))))
         (is (= [:silver :platinum :none :silver]
-               (map register (load-applications file))))))
+               (map register (load-applications file))))
+        (is (= [:silver :platinum :none :silver]
+               (map register (load-applications file))))
+        (is (= [:silver :platinum]
+               (map registration (load-applications file) test-policies)))))
     (testing "Gracefully handles issues"
       (is (nil? (load-applications bad-file))))))
