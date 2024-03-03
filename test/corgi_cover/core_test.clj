@@ -55,7 +55,7 @@
                     :corgi-count 19 :policy-count 0}
                    {:name "Logan" :state "WA"
                     :corgi-count 2 :policy-count 1}]
-        file "./src/resources/corgi-cover-applications.csv"
+        file "./resources/in/corgi-cover-applications.csv"
         bad-file "./does/not/exist"]
     
     (testing "Can read corgi cover applications CSV file"
