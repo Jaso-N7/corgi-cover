@@ -65,5 +65,12 @@
     
     (testing "Can convert file to data structure"
       (is (= test-data (load-applications file))))
+    (testing "Validate CSV loaded applications"
+      (let [test-policies {"Chloe" ["secure goldfish"]
+                           "Ethan" ["cool cats cover" "megasafe"]}]
+        (is (= [:silver :platinum]
+               (map registration (load-applications file) test-policies)))
+        (is (= [:silver :platinum :none :silver]
+               (map register (load-applications file))))))
     (testing "Gracefully handles issues"
       (is (nil? (load-applications bad-file))))))
