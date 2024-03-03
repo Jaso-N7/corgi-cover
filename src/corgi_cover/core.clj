@@ -90,28 +90,25 @@
           (not ms-holder?) tier)))
 
 ;; load-applications : IO File -> [Applications]
-#_(defn load-applications [file]
-  (println {:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0})
-  [{:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0}
-   {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}
-   {:name "Annabelle" :state "WY"
-    :corgi-count 19 :policy-count 0}
-   {:name "Logan" :state "WA"
-    :corgi-count 2 :policy-count 1}])   ; stub
-
 (defn load-applications
   "Opens CSV containing Corgi Cover applications and converts the information
   to an internal data structure.
   Returns NIL if unable to perform operation."
   [file]
-  (try
-    (when (.exists (clojure.java.io/file file))
-      (let [contents (line-seq (BufferedReader. (StringReader. (slurp file))))
-            header (first contents)
-            applications (rest contents)]
-        (into [] (for [application applications]
-                   (apply merge (map #(hash-map (keyword %1) %2)
-                                     (string/split header #", ")
-                                     (string/split application #", ")))))))
-    (catch java.io.FileNotFoundException x
-      (println "Unable to load/find file: " file))))
+  (letfn [(parse-map [ks vs]
+            (vec (for [v vs]
+                   (apply merge (map #(hash-map (keyword %1)
+                                                (or (parse-long %2) %2))
+                                     (string/split ks #", ")
+                                     (string/split v #", "))))))]
+
+    (try
+      (when (.exists (clojure.java.io/file file))
+        (let [contents (line-seq (BufferedReader. (StringReader. (slurp file))))
+              header       (first contents)
+              applications (rest contents)
+              converted    (parse-map header applications)]
+          (doseq [application converted] (println application))
+          converted))
+      (catch java.io.FileNotFoundException x
+        (println "Unable to load/find file: " file)))))
