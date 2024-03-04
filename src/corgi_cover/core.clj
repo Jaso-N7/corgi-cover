@@ -2,6 +2,13 @@
     (:require [clojure.string :as string])
     (:import [java.io BufferedReader StringReader]))
 
+(def eligible-file-path
+  "Saved records of all valid corgi cover applications"
+  "./resources/out/eligible-corgi-cover-applications.csv")
+(def ineligible-file-path
+  "Saved records of all invalid corgi cover applications"
+  "./resources/out/ineligible-corgi-cover-applications.csv")
+
 ;;; --- Data Definitions:
 (def state
   "A State is a set:
@@ -112,3 +119,41 @@
           converted))
       (catch java.io.FileNotFoundException x
         (println "Unable to load/find file: " file)))))
+
+;; verify-applications : [Applications] -> IO Files
+;; 
+;; Eligible file: eligible-corgi-cover-applications.csv
+;; Ineligible file: ineligible-corgi-cover-applications.csv
+#_(defn verify-applications [applications]
+  (throw (ex-info "Not yet implemented" {:applications applications})))
+
+(defn verify-applications
+  "Processes the applications, opens two output files and writes to them
+  based upon eligibility check."
+  [applications]
+  (letfn [(application->string [m]
+            (str (:name m) ", " (:state m) ", " (:corgi-count m) ", "
+                 (:policy-count m) "\n"))
+          (write-file [f a]
+            (let [csv-header (str "name, state, corgi-count, policy-count\n")]
+              (if (.exists (clojure.java.io/file f))
+                (spit f (application->string a) :append true)
+                (spit f (str csv-header (application->string a))))))
+          (verify [a]
+            (if (eligible? (:state a) (:corgi-count a))
+              (try
+                (write-file eligible-file-path a)
+                1
+                (catch Exception x
+                  (println "Issue processing Eligible applications:\n" x)))
+              (try
+                (write-file ineligible-file-path a)
+                0
+                (catch Exception x
+                  (println "Issue processing Ineligible applications:\n" x)))))]
+
+    (let [verified (map verify applications)
+          valid (reduce + verified)
+          invalid (- (count verified) valid)]
+      (format "%d of %d applications were valid. Remaining %d were invalid"
+              valid (count verified) invalid)) ))
