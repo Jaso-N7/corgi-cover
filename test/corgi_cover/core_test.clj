@@ -102,3 +102,9 @@
                (slurp good-file)))
         (is (= "name, state, corgi-count, policy-count\nAnnabelle, WY, 19, 0\n"
                (slurp bad-file)))))))
+
+(deftest test-not-eligible?
+  (testing "validating with reasons"
+    (is (nil? (not-eligible? "IL" 1)) "Returns 'nil' if no problems are found")
+    (is (= "Residence not eligible." (not-eligible? "WY" 2)))
+    (is (= "Does not own a Corgi." (not-eligible? "WA" 0)))))

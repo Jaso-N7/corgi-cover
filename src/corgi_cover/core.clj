@@ -64,6 +64,21 @@
                                       :corgi-count corgi-count})))
   (and (contains? state a-state) (pos? corgi-count)))
 
+;; not-eligible? : State natural -> string?
+(defn not-eligible?
+  "Returns NIL indicating a person is eligible or returns the reason as a
+  string if a problem is found.
+  Throws an Exception for invalid inputs.
+  Examples
+  - (not-eligible? \"IL\" 1) => nil
+  - (not-eligible? \"WY\" 2) => \"Residence not eligible.\"
+  - (not-eligible? \"WA\" 0) => \"Does not own a Corgi.\""
+  [a-state corgi-count]
+  (when-not (eligible? a-state corgi-count)
+    (if (not (contains? state a-state))
+      (str "Residence not eligible.")
+      (str "Does not own a Corgi."))))
+
 ;; tier-coverage : State natural natural -> Tier
 (defn tier-coverage
   "Offers 'Corgi Cover' at the specified tier, if the owner lives
