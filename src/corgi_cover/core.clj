@@ -156,4 +156,4 @@
           valid (reduce + verified)
           invalid (- (count verified) valid)]
       (format "%d of %d applications were valid. Remaining %d were invalid"
-              valid (count verified) invalid)) ))
+              valid (count verified) invalid))))

@@ -48,6 +48,7 @@
       (is (= :none     (registration (test-data 2) test-policies)))
       (is (= :silver   (registration (test-data 3) test-policies))))))
 
+;; Ensure ./resources/{in,out} are already created
 (deftest test-onboarding
   (let [test-data [{:name "Chloe" :state "IL" :corgi-count 1 :policy-count 0}
                    {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}
@@ -65,6 +66,7 @@
     
     (testing "Can convert file to data structure"
       (is (= test-data (load-applications file))))
+    
     (testing "Validate CSV loaded applications"
       (let [test-policies {"Chloe" ["secure goldfish"]
                            "Ethan" ["cool cats cover" "megasafe"]}]
@@ -77,5 +79,26 @@
                (map register (load-applications file))))
         (is (= [:silver :platinum]
                (map registration (load-applications file) test-policies)))))
+
     (testing "Gracefully handles issues"
-      (is (nil? (load-applications bad-file))))))
+      (is (nil? (load-applications bad-file))))
+    
+    (testing "Can create valid and invalid applications CSV files"
+      (let [good-file "./resources/out/eligible-corgi-cover-applications.csv"
+            bad-file "./resources/out/ineligible-corgi-cover-applications.csv"]
+
+        (map (fn clean-up [f]
+               (when (.exists (clojure.java.io/file f))
+                 (.delete (clojure.java.io/file f))))
+             [good-file bad-file]) 
+
+        (try (verify-applications (load-applications file))
+             (catch Exception x
+               (throw (ex-info "Double-check code" {:x x}))))
+        
+        (is (.exists (clojure.java.io/file good-file)))
+        (is (.exists (clojure.java.io/file bad-file)))
+        (is (= "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nLogan, WA, 2, 1\n"
+               (slurp good-file)))
+        (is (= "name, state, corgi-count, policy-count\nAnnabelle, WY, 19, 0\n"
+               (slurp bad-file)))))))
