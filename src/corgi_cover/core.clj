@@ -82,9 +82,8 @@
 ;; register : Application -> Tier
 (defn register
   "Input a 'corgi cover' application and determine eligibility"
-  [an-application]
-  (let [{s :state cc :corgi-count pc :policy-count} an-application]
-    (tier-coverage s cc pc)))
+  [{s :state cc :corgi-count pc :policy-count}]
+  (tier-coverage s cc pc))
 
 ;; registration : Application Policy -> Tier
 (defn registration
