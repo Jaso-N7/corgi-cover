@@ -59,7 +59,7 @@
                    {:name "Tyler" :state "WA"
                     :corgi-count 0 :policy-count 0}]
         file "./resources/in/corgi-cover-applications.csv"
-        bad-file "./does/not/exist"]
+        non-existent-file "./does/not/exist"]
     
     (testing "Can read corgi cover applications CSV file"
       (let [applications (slurp file)]
@@ -81,7 +81,7 @@
                (map registration (load-applications file) test-policies)))))
 
     (testing "Gracefully handles issues"
-      (is (nil? (load-applications bad-file))))
+      (is (nil? (load-applications non-existent-file))))
 
     (testing "validating with reasons"
       (is (nil? (not-eligible? "IL" 1)) "Returns 'nil' if no problems are found")
@@ -90,8 +90,14 @@
     
     (testing "Can create eligible and ineligible applications CSV files"
       (let [good-file "./resources/out/eligible-corgi-cover-applications.csv"
-            bad-file "./resources/out/ineligible-corgi-cover-applications.csv"]
-
+            bad-file "./resources/out/ineligible-corgi-cover-applications.csv"
+            purged? (reduce =
+                           (map (fn clean-up [f]
+                                  (when (.exists (clojure.java.io/file f))
+                                    (.delete (clojure.java.io/file f))))
+                                [good-file bad-file]))]
+        (is purged?)
+        
         (comment
           (try (verify-applications (load-applications file))
                (catch Exception x
@@ -107,11 +113,6 @@
         (is (= "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nLogan, WA, 2, 1\n"
                (slurp good-file)))
         (is (= "name, state, corgi-count, policy-count, reason\nAnnabelle, WY, 19, 0, Residence not eligible.\nTyler, WA, 0, 0, Does not own a Corgi.\n"
-               (slurp bad-file)))
-        
-        (map (fn clean-up [f]
-               (when (.exists (clojure.java.io/file f))
-                 (.delete (clojure.java.io/file f))))
-             [good-file bad-file])))))
+               (slurp bad-file)))))))
 
 
