@@ -55,13 +55,15 @@
                    {:name "Annabelle" :state "WY"
                     :corgi-count 19 :policy-count 0}
                    {:name "Logan" :state "WA"
-                    :corgi-count 2 :policy-count 1}]
+                    :corgi-count 2 :policy-count 1}
+                   {:name "Tyler" :state "WA"
+                    :corgi-count 0 :policy-count 0}]
         file "./resources/in/corgi-cover-applications.csv"
         bad-file "./does/not/exist"]
     
     (testing "Can read corgi cover applications CSV file"
       (let [applications (slurp file)]
-        (is (= "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nAnnabelle, WY, 19, 0\nLogan, WA, 2, 1"
+        (is (= "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nAnnabelle, WY, 19, 0\nLogan, WA, 2, 1\nTyler, WA, 0, 0\n"
                applications))))
     
     (testing "Can convert file to data structure"
@@ -70,41 +72,46 @@
     (testing "Validate CSV loaded applications"
       (let [test-policies {"Chloe" ["secure goldfish"]
                            "Ethan" ["cool cats cover" "megasafe"]}]
-        (is (= '(true true false true)
+        (is (= '(true true false true false)
                (map #(eligible? (:state %) (:corgi-count %))
                     (load-applications file))))
-        (is (= [:silver :platinum :none :silver]
-               (map register (load-applications file))))
-        (is (= [:silver :platinum :none :silver]
+        (is (= [:silver :platinum :none :silver :none]
                (map register (load-applications file))))
         (is (= [:silver :platinum]
                (map registration (load-applications file) test-policies)))))
 
     (testing "Gracefully handles issues"
       (is (nil? (load-applications bad-file))))
+
+    (testing "validating with reasons"
+      (is (nil? (not-eligible? "IL" 1)) "Returns 'nil' if no problems are found")
+      (is (= "Residence not eligible." (not-eligible? "WY" 2)))
+      (is (= "Does not own a Corgi." (not-eligible? "WA" 0))))
     
-    (testing "Can create valid and invalid applications CSV files"
+    (testing "Can create eligible and ineligible applications CSV files"
       (let [good-file "./resources/out/eligible-corgi-cover-applications.csv"
             bad-file "./resources/out/ineligible-corgi-cover-applications.csv"]
 
-        (map (fn clean-up [f]
-               (when (.exists (clojure.java.io/file f))
-                 (.delete (clojure.java.io/file f))))
-             [good-file bad-file]) 
+        (comment
+          (try (verify-applications (load-applications file))
+               (catch Exception x
+                 (throw (ex-info "Unable to verify I/O" {:x x})))))
 
-        (try (verify-applications (load-applications file))
-             (catch Exception x
-               (throw (ex-info "Double-check code" {:x x}))))
+        (try
+          (validate-applications (load-applications file))
+          (catch Exception x
+            (is (not true) "Unable to validate I/O")))
         
         (is (.exists (clojure.java.io/file good-file)))
         (is (.exists (clojure.java.io/file bad-file)))
         (is (= "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nLogan, WA, 2, 1\n"
                (slurp good-file)))
-        (is (= "name, state, corgi-count, policy-count\nAnnabelle, WY, 19, 0\n"
-               (slurp bad-file)))))))
+        (is (= "name, state, corgi-count, policy-count, reason\nAnnabelle, WY, 19, 0, Residence not eligible.\nTyler, WA, 0, 0, Does not own a Corgi.\n"
+               (slurp bad-file)))
+        
+        (map (fn clean-up [f]
+               (when (.exists (clojure.java.io/file f))
+                 (.delete (clojure.java.io/file f))))
+             [good-file bad-file])))))
 
-(deftest test-not-eligible?
-  (testing "validating with reasons"
-    (is (nil? (not-eligible? "IL" 1)) "Returns 'nil' if no problems are found")
-    (is (= "Residence not eligible." (not-eligible? "WY" 2)))
-    (is (= "Does not own a Corgi." (not-eligible? "WA" 0)))))
+

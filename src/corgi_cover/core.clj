@@ -135,14 +135,10 @@
         (println "Unable to load/find file: " file)))))
 
 ;; verify-applications : [Applications] -> IO Files
-;; 
-;; Eligible file: eligible-corgi-cover-applications.csv
-;; Ineligible file: ineligible-corgi-cover-applications.csv
-#_(defn verify-applications [applications]
-  (throw (ex-info "Not yet implemented" {:applications applications})))
-
 (defn verify-applications
-  "Processes the applications, opens two output files and writes to them
+  "OBSOLETE - replaced by `validate-applications`
+
+  Processes the applications, opens two output files and writes to them
   based upon eligibility check."
   [applications]
   (letfn [(application->string [m]
@@ -165,6 +161,45 @@
                 0
                 (catch Exception x
                   (println "Issue processing Ineligible applications:\n" x)))))]
+
+    (let [verified (map verify applications)
+          valid (reduce + verified)
+          invalid (- (count verified) valid)]
+      (format "%d of %d applications were valid. Remaining %d were invalid"
+              valid (count verified) invalid))))
+
+;; validate-applications : [Applications] -> IO Files
+(defn validate-applications
+  "Processes the applications, opens two output files and writes to them
+  based upon eligibility check."
+  [applications]
+  (letfn [(application->string [m]
+            (if (:reason m)
+              (str (:name m) ", " (:state m) ", " (:corgi-count m) ", "
+                   (:policy-count m) ", " (:reason m) "\n")
+              (str (:name m) ", " (:state m) ", " (:corgi-count m) ", "
+                   (:policy-count m) "\n")))
+          (write-file [f a]
+            (let [csv-header
+                  (if (:reason a)
+                    (str "name, state, corgi-count, policy-count, reason\n")
+                    (str "name, state, corgi-count, policy-count\n"))]
+              (if (.exists (clojure.java.io/file f))
+                (spit f (application->string a) :append true)
+                (spit f (str csv-header (application->string a))))))
+          (verify [a]
+            (let [reason (not-eligible? (:state a) (:corgi-count a))]
+              (if reason
+                (try
+                  (write-file ineligible-file-path (assoc a :reason reason))
+                  0
+                  (catch Exception x
+                    (println "Issue processing Invalid applications:\n" x)))
+                (try
+                  (write-file eligible-file-path a)
+                  1
+                  (catch Exception x
+                    (println "Issue processing Valid applications:\n" x))))))]
 
     (let [verified (map verify applications)
           valid (reduce + verified)
