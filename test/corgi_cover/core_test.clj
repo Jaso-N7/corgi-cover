@@ -90,12 +90,14 @@
     
     (testing "Can create eligible and ineligible applications CSV files"
       (let [good-file "./resources/out/eligible-corgi-cover-applications.csv"
+            expected-good-file-output "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nLogan, WA, 2, 1\n"
             bad-file "./resources/out/ineligible-corgi-cover-applications.csv"
+            expected-bad-file-output "name, state, corgi-count, policy-count, reason\nAnnabelle, WY, 19, 0, Residence not eligible.\nTyler, WA, 0, 0, Does not own a Corgi.\n"
             purged? (reduce =
-                           (map (fn clean-up [f]
-                                  (when (.exists (clojure.java.io/file f))
-                                    (.delete (clojure.java.io/file f))))
-                                [good-file bad-file]))]
+                            (map (fn clean-up [f]
+                                   (when (.exists (clojure.java.io/file f))
+                                     (.delete (clojure.java.io/file f))))
+                                 [good-file bad-file]))]
         (is purged?)
         
         (comment
@@ -110,9 +112,7 @@
         
         (is (.exists (clojure.java.io/file good-file)))
         (is (.exists (clojure.java.io/file bad-file)))
-        (is (= "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nLogan, WA, 2, 1\n"
-               (slurp good-file)))
-        (is (= "name, state, corgi-count, policy-count, reason\nAnnabelle, WY, 19, 0, Residence not eligible.\nTyler, WA, 0, 0, Does not own a Corgi.\n"
-               (slurp bad-file)))))))
+        (is (= expected-good-file-output (slurp good-file)))
+        (is (= expected-bad-file-output (slurp bad-file)))))))
 
 
