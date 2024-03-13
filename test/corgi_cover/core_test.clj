@@ -84,9 +84,9 @@
       (is (nil? (load-applications non-existent-file))))
 
     (testing "validating with reasons"
-      (is (nil? (not-eligible? "IL" 1)) "Returns 'nil' if no problems are found")
-      (is (= "Residence not eligible." (not-eligible? "WY" 2)))
-      (is (= "Does not own a Corgi." (not-eligible? "WA" 0))))
+      (is (nil? (not-eligible? (get test-data 0))) "Returns 'nil' if no problems are found")
+      (is (= "Residence not eligible." (not-eligible? (get test-data 2))))
+      (is (= "Does not own a Corgi." (not-eligible? (get test-data 4)))))
     
     (testing "Can create eligible and ineligible applications CSV files"
       (let [good-file "./resources/out/eligible-corgi-cover-applications.csv"
