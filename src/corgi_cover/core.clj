@@ -64,16 +64,12 @@
                                       :corgi-count corgi-count})))
   (and (contains? state a-state) (pos? corgi-count)))
 
-;; not-eligible? : State natural -> string?
+;; not-eligible? : Application -> string?
 (defn not-eligible?
   "Returns NIL indicating a person is eligible or returns the reason as a
   string if a problem is found.
-  Throws an Exception for invalid inputs.
-  Examples
-  - (not-eligible? \"IL\" 1) => nil
-  - (not-eligible? \"WY\" 2) => \"Residence not eligible.\"
-  - (not-eligible? \"WA\" 0) => \"Does not own a Corgi.\""
-  [a-state corgi-count]
+  Throws an Exception for invalid inputs."
+  [{a-state :state corgi-count :corgi-count}]
   (when-not (eligible? a-state corgi-count)
     (if (not (contains? state a-state))
       (str "Residence not eligible.")
@@ -188,7 +184,7 @@
                 (spit f (application->string a) :append true)
                 (spit f (str csv-header (application->string a))))))
           (verify [a]
-            (let [reason (not-eligible? (:state a) (:corgi-count a))]
+            (let [reason (not-eligible? a)]
               (if reason
                 (try
                   (write-file ineligible-file-path (assoc a :reason reason))
