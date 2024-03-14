@@ -7,7 +7,7 @@ insuracenc policy. Only certain people are eligible to register for "corgi
 cover". To be eligible they must own a corgi and live in either Illinois,
 Washington, New York or Colorado.
 
-This is Challenge 1 taken from the Enterprise Clojure course.
+This is the Challenge taken from the Enterprise Clojure course.
 
 ## Usage
 
