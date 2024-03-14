@@ -1,12 +1,17 @@
 (ns corgi-cover.core "Corgi Cover Eligibility"
     (:require [clojure.string :as string]
+              [clojure.java.io :as io]
               [clojure.data.csv :as csv]
               [clojure.data.json :as json])
-    (:import [java.io BufferedReader StringReader]))
+    (:import [java.io BufferedReader StringReader FileNotFoundException]))
 
 (def eligible-file-path
   "Saved records of all valid corgi cover applications"
   "./resources/out/eligible-corgi-cover-applications.csv")
+(def json-file-path
+  "Saved records of all valid corgi cover applications used in Megacorp
+merger."
+  "./resources/out/eligible-corgi-cover-applications.json")
 (def ineligible-file-path
   "Saved records of all invalid corgi cover applications"
   "./resources/out/ineligible-corgi-cover-applications.csv")
@@ -122,14 +127,14 @@
                                      (string/split v #", "))))))]
 
     (try
-      (when (.exists (clojure.java.io/file file))
+      (when (.exists (io/file file))
         (let [contents (line-seq (BufferedReader. (StringReader. (slurp file))))
               header       (first contents)
               applications (rest contents)
               converted    (parse-map header applications)]
           (doseq [application converted] (println application))
           converted))
-      (catch java.io.FileNotFoundException x
+      (catch FileNotFoundException x
         (println "Unable to load/find file: " file)))))
 
 ;; verify-applications : [Applications] -> IO Files
@@ -144,7 +149,7 @@
                  (:policy-count m) "\n"))
           (write-file [f a]
             (let [csv-header (str "name, state, corgi-count, policy-count\n")]
-              (if (.exists (clojure.java.io/file f))
+              (if (.exists (io/file f))
                 (spit f (application->string a) :append true)
                 (spit f (str csv-header (application->string a))))))
           (verify [a]
@@ -182,7 +187,7 @@
                   (if (:reason a)
                     (str "name, state, corgi-count, policy-count, reason\n")
                     (str "name, state, corgi-count, policy-count\n"))]
-              (if (.exists (clojure.java.io/file f))
+              (if (.exists (io/file f))
                 (spit f (application->string a) :append true)
                 (spit f (str csv-header (application->string a))))))
           (verify [a]
@@ -206,4 +211,25 @@
 
 ;; load-and-validate : IO -> IO
 ;; Saves valid application data to a JSON file
-(defn load-and-validate [file-in] (throw (ex-info "Not yet implemented" {:file-in file-in})))
+#_(defn load-and-validate [file-in] (throw (ex-info "Not yet implemented" {:file-in file-in})))
+
+(defn load-and-validate
+  "Writes valid applications into a JSON file.
+  May throw a FileNotFoundException in the event of errors."
+  [csv]
+  (letfn [(csv->map [head & applications]
+            (map #(zipmap (map keyword head) %1) applications))]
+    (if (pos? (:valid (->> csv
+                           load-applications
+                           validate-applications)))
+      (try
+        (with-open [writer (io/writer json-file-path)]
+          (json/write  (apply csv->map
+                              (with-open [reader (io/reader eligible-file-path)]
+                                (doall
+                                 (csv/read-csv reader))))
+                       writer))
+        (catch FileNotFoundException fnf
+          (print "Unable to locate ")))
+      'no-json
+      )) )

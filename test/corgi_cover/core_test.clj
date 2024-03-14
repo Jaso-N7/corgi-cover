@@ -60,7 +60,9 @@
                    {:name "Tyler" :state "WA"
                     :corgi-count 0 :policy-count 0}]
         file "./resources/in/corgi-cover-applications.csv"
-        non-existent-file "./does/not/exist"]
+        non-existent-file "./does/not/exist"
+        good-file "./resources/out/eligible-corgi-cover-applications.csv"
+        bad-file "./resources/out/ineligible-corgi-cover-applications.csv"]
     
     (testing "Can read corgi cover applications CSV file"
       (let [applications (slurp file)]
@@ -91,9 +93,7 @@
       (is (= "Does not own a Corgi." (not-eligible? (get test-data 4)))))
     
     (testing "Can create eligible and ineligible applications CSV files"
-      (let [good-file "./resources/out/eligible-corgi-cover-applications.csv"
-            expected-good-file-output "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nLogan, WA, 2, 1\n"
-            bad-file "./resources/out/ineligible-corgi-cover-applications.csv"
+      (let [expected-good-file-output "name, state, corgi-count, policy-count\nChloe, IL, 1, 0\nEthan, IL, 4, 2\nLogan, WA, 2, 1\n"
             expected-bad-file-output "name, state, corgi-count, policy-count, reason\nAnnabelle, WY, 19, 0, Residence not eligible.\nTyler, WA, 0, 0, Does not own a Corgi.\n"
             purged? (reduce =
                             (map (fn clean-up [f]
@@ -117,7 +117,20 @@
         (is (= expected-good-file-output (slurp good-file)))
         (is (= expected-bad-file-output (slurp bad-file)))))
     (testing "Can create JSON for Megacorp downstream"
-      (let [json-file "./resources/out/eligible-corgi-cover-applications.json"]
-        (is (.exists (io/file json-file)))))))
+      (let [json-file "./resources/out/eligible-corgi-cover-applications.json"
+            expected-json-contents (str "[{\"name\":\"Chloe\",\" state\":\" IL\",\" corgi-count\":\" 1\",\" policy-count\":\" 0\"},{\"name\":\"Ethan\",\" state\":\" IL\",\" corgi-count\":\" 4\",\" policy-count\":\" 2\"},{\"name\":\"Logan\",\" state\":\" WA\",\" corgi-count\":\" 2\",\" policy-count\":\" 1\"}]")
+            purged? (reduce =
+                            (map (fn clean-up [f]
+                                   (when (.exists (io/file f))
+                                     (.delete (io/file f))))
+                                 [good-file bad-file json-file]))]
+
+        (when purged?
+          (try (load-and-validate file)
+               (catch Exception x
+                 (is (not true) "Unable to load and validate file")))
+        
+          (is (.exists (io/file json-file)))
+          (is (= expected-json-contents (slurp json-file))))))))
 
 
