@@ -217,6 +217,7 @@ merger."
   "Writes valid applications into a JSON file.
   May throw a FileNotFoundException in the event of errors."
   [csv]
+  ;; csv-map solution: https://clojuredocs.org/clojure.core/zipmap#example-56fbf77de4b069b77203b858
   (letfn [(csv->map [head & applications]
             (map #(zipmap (map keyword head) % 1) applications))]
     (when (pos? (:valid (->> csv
