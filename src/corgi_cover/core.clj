@@ -202,8 +202,7 @@
     (let [verified (map verify applications)
           valid (reduce + verified)
           invalid (- (count verified) valid)]
-      (format "%d of %d applications were valid. Remaining %d were invalid"
-              valid (count verified) invalid))))
+      {:valid valid :invalid invalid})))
 
 ;; load-and-validate : IO -> IO
 ;; Saves valid application data to a JSON file
