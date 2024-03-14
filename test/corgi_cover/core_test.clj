@@ -1,6 +1,7 @@
 (ns corgi-cover.core-test
   (:require [clojure.test :refer :all]
-            [corgi-cover.core :refer :all]))
+            [corgi-cover.core :refer :all]
+            [clojure.java.io :as io]))
 
 (deftest eligible-test
   (testing "Corgi cover eligibility"
@@ -96,8 +97,8 @@
             expected-bad-file-output "name, state, corgi-count, policy-count, reason\nAnnabelle, WY, 19, 0, Residence not eligible.\nTyler, WA, 0, 0, Does not own a Corgi.\n"
             purged? (reduce =
                             (map (fn clean-up [f]
-                                   (when (.exists (clojure.java.io/file f))
-                                     (.delete (clojure.java.io/file f))))
+                                   (when (.exists (io/file f))
+                                     (.delete (io/file f))))
                                  [good-file bad-file]))]
         (is purged?)
         
@@ -111,9 +112,12 @@
           (catch Exception x
             (is (not true) "Unable to validate I/O")))
         
-        (is (.exists (clojure.java.io/file good-file)))
-        (is (.exists (clojure.java.io/file bad-file)))
+        (is (.exists (io/file good-file)))
+        (is (.exists (io/file bad-file)))
         (is (= expected-good-file-output (slurp good-file)))
-        (is (= expected-bad-file-output (slurp bad-file)))))))
+        (is (= expected-bad-file-output (slurp bad-file)))))
+    (testing "Can create JSON for Megacorp downstream"
+      (let [json-file "./resources/out/eligible-corgi-cover-applications.json"]
+        (is (.exists (io/file json-file)))))))
 
 

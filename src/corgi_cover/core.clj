@@ -1,5 +1,7 @@
 (ns corgi-cover.core "Corgi Cover Eligibility"
-    (:require [clojure.string :as string])
+    (:require [clojure.string :as string]
+              [clojure.data.csv :as csv]
+              [clojure.data.json :as json])
     (:import [java.io BufferedReader StringReader]))
 
 (def eligible-file-path
@@ -164,7 +166,7 @@
       (format "%d of %d applications were valid. Remaining %d were invalid"
               valid (count verified) invalid))))
 
-;; validate-applications : [Applications] -> IO Files
+;; validate-applications : [Applications] -> IO
 (defn validate-applications
   "Processes the applications, opens two output files and writes to them
   based upon eligibility check."
@@ -202,3 +204,7 @@
           invalid (- (count verified) valid)]
       (format "%d of %d applications were valid. Remaining %d were invalid"
               valid (count verified) invalid))))
+
+;; load-and-validate : IO -> IO
+;; Saves valid application data to a JSON file
+(defn load-and-validate [file-in] (throw (ex-info "Not yet implemented" {:file-in file-in})))
