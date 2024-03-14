@@ -218,18 +218,16 @@ merger."
   May throw a FileNotFoundException in the event of errors."
   [csv]
   (letfn [(csv->map [head & applications]
-            (map #(zipmap (map keyword head) %1) applications))]
-    (if (pos? (:valid (->> csv
-                           load-applications
-                           validate-applications)))
+            (map #(zipmap (map keyword head) % 1) applications))]
+    (when (pos? (:valid (->> csv
+                             load-applications
+                             validate-applications)))
       (try
         (with-open [writer (io/writer json-file-path)]
-          (json/write  (apply csv->map
-                              (with-open [reader (io/reader eligible-file-path)]
-                                (doall
-                                 (csv/read-csv reader))))
-                       writer))
+          (json/write (apply csv->map
+                             (with-open [reader (io/reader eligible-file-path)]
+                               (doall
+                                (csv/read-csv reader))))
+                      writer))
         (catch FileNotFoundException fnf
-          (print "Unable to locate ")))
-      'no-json
-      )) )
+          (print "Unable to locate "))))))
