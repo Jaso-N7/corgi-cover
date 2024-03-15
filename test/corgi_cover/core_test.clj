@@ -133,4 +133,22 @@
           (is (.exists (io/file json-file)))
           (is (= expected-json-contents (slurp json-file))))))))
 
+(deftest fetch-megacorp-policies-test
+  (let [holders
+        {"Chloe" ["secure goldfish"]
+         "Ethan" ["cool cats cover" "megasafe"]}
+        file "./resources/in/corgi-cover-applications.csv"]
 
+    (testing "Web request (mocking)"
+      (with-redefs [fetch-megacorp-policies
+                    (fn [holder]
+                      (Thread/sleep 1e2)
+                      (get holders holder))]
+        (is (= (get holders "Chloe")
+               (fetch-megacorp-policies "Chloe")))
+        (is (= (get holders "Ethan")
+               (fetch-megacorp-policies "Ethan")))))
+    (testing "Eligibility checks using the web request"
+      (is (= [:silver :platinum]
+               (map registration (load-applications file) holders))))))
+    

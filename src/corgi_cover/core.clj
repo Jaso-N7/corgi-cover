@@ -232,3 +232,8 @@ merger."
                       writer))
         (catch FileNotFoundException fnf
           (print "Unable to locate "))))))
+;; fetch-megacorp-policies : IO
+(defn fetch-megacorp-policies
+  "Cross-reference Megacorp to check if the customer has a Megacorp policy
+  already via a remote web service."
+  [policy-holder])
