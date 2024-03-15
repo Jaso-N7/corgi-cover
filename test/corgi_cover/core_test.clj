@@ -140,15 +140,26 @@
         file "./resources/in/corgi-cover-applications.csv"]
 
     (testing "Web request (mocking)"
-      (with-redefs [fetch-megacorp-policies
-                    (fn [holder]
-                      (Thread/sleep 1e2)
-                      (get holders holder))]
-        (is (= (get holders "Chloe")
-               (fetch-megacorp-policies "Chloe")))
-        (is (= (get holders "Ethan")
-               (fetch-megacorp-policies "Ethan")))))
+      (letfn [(web-request-timer [fun req]
+                (let [start-time (System/nanoTime)]
+                  (doto (fun req)
+                    (prn (str "*** Retrieving " req " took "
+                              (- (System/nanoTime) start-time)
+                              " ns")))))]
+        
+        (with-redefs [fetch-megacorp-policies
+                      (fn [holder]
+                        (Thread/sleep 1e2)
+                        (get holders holder))]
+
+          (is (= [(get holders "Chloe")
+                   (get holders "Ethan")]
+                 (map #(web-request-timer fetch-megacorp-policies %)
+                      ["Chloe" "Ethan"]))))))
+    
     (testing "Eligibility checks using the web request"
       (is (= [:silver :platinum]
-               (map registration (load-applications file) holders))))))
+             (map registration
+                  (load-applications file)
+                  holders))))))
     
