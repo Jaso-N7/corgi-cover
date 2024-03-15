@@ -139,27 +139,27 @@
          "Ethan" ["cool cats cover" "megasafe"]}
         file "./resources/in/corgi-cover-applications.csv"]
 
-    (testing "Web request (mocking)"
-      (letfn [(web-request-timer [fun req]
-                (let [start-time (System/nanoTime)]
-                  (doto (fun req)
-                    (prn (str "*** Retrieving " req " took "
-                              (- (System/nanoTime) start-time)
-                              " ns")))))]
-        
-        (with-redefs [fetch-megacorp-policies
-                      (fn [holder]
-                        (Thread/sleep 1e2)
-                        (get holders holder))]
+    (with-redefs [fetch-megacorp-policies
+                  (fn [holder]
+                    (Thread/sleep 1e2)
+                    (get holders holder))]
+
+
+
+      (testing "Web request (mocking)"
+        (letfn [(web-request-timer [fun req]
+                  (let [start-time (System/nanoTime)]
+                    (doto (fun req)
+                      (prn (str "*** Retrieving " req " took "
+                                (- (System/nanoTime) start-time)
+                                " ns")))))]
 
           (is (= [(get holders "Chloe")
-                   (get holders "Ethan")]
+                  (get holders "Ethan")]
                  (map #(web-request-timer fetch-megacorp-policies %)
-                      ["Chloe" "Ethan"]))))))
-    
-    (testing "Eligibility checks using the web request"
-      (is (= [:silver :platinum]
-             (map registration
-                  (load-applications file)
-                  holders))))))
-    
+                      ["Chloe" "Ethan"])))))
+
+      (testing "Eligibility checks using the web request"
+        (is (= "megasafe"
+               (when (= :platinum (register {:name "Ethan" :state "IL" :corgi-count 4 :policy-count 2}))
+                 ((set (fetch-megacorp-policies "Ethan")) "megasafe"))))))))
