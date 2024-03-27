@@ -9,6 +9,16 @@ Washington, New York or Colorado.
 
 This is the Challenge taken from the Enterprise Clojure course.
 
+## Testing
+
+Prior to testing, please ensure to create the `/resources/out` directory.
+
+```
+$ mkdir -p /resources/out
+$ lein test
+```
+
+
 ## Usage
 
 
